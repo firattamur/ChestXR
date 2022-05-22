@@ -32,7 +32,6 @@ class ChestXRDataset(Dataset):
                 [
                     transforms.ToPILImage(),
                     transforms.ToTensor(),
-                    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
                 ]
             )
 
@@ -43,14 +42,18 @@ class ChestXRDataset(Dataset):
                 [
                     transforms.ToPILImage(),
                     transforms.ToTensor(),
-                    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
                 ]
             )
 
         self.image_paths: list = []
 
         with open(self.path_txt, 'r') as file:
-            self.image_paths = [os.path.join(self.path_images, name.strip()) for name in file.readlines()]
+
+            for name in file.readlines():
+                path_image = os.path.join(self.path_images, name.strip())
+
+                if os.path.exists(path_image):
+                    self.image_paths.append(path_image)
 
     def __len__(self) -> int:
         """
@@ -76,7 +79,8 @@ class ChestXRDataset(Dataset):
 
         label = self.labels_encoded[self.labels_encoded["Image Index"] == image_name].drop(["Image Index"],
                                                                                            axis=1).values[0]
-        image = iio.imread(image_path, as_gray=True)
+        image = iio.imread(image_path)
+        image = torch.tensor(image).unsqueeze(0)
 
         return self.transforms(image), torch.tensor(label)
 
