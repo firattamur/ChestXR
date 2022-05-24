@@ -13,7 +13,7 @@ DVALID_SIZE  = 1000
 # Model
 # ----------------------------------------
 
-MODEL    = "efficientnet-lite2"
+MODEL    = "mobilenetv3_large_100"
 
 NBATCH   = 64
 NWORKERS = 4

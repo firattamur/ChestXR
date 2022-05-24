@@ -51,17 +51,17 @@ class ChestXRDataset(Dataset):
 
             image_names = file.readlines()
 
-            if self.dset == "train":
-                image_names = image_names[:-self.valid_size]
-
-            if self.dset == "valid":
-                image_names = image_names[-self.valid_size:]
-
             for name in image_names:
                 path_image = os.path.join(self.path_images, name.strip())
 
                 if os.path.exists(path_image):
                     self.image_paths.append(path_image)
+
+        if self.dset == "train":
+            self.image_paths = self.image_paths[:-self.valid_size]
+
+        if self.dset == "valid":
+            self.image_paths = self.image_paths[-self.valid_size:]
 
     def __len__(self) -> int:
         """

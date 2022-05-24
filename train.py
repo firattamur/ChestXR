@@ -1,9 +1,9 @@
-import copy
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 
 import timm
+from tqdm import tqdm
 from utils.utils_train import *
 from utils.utils_dataset import *
 from utils.utils_commandline import *
