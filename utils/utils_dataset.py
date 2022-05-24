@@ -4,7 +4,6 @@ import torch
 from torch.utils.data import ConcatDataset
 from dataset.chestxr14_dataset import ChestXRDataset
 from torchvision import datasets, transforms
-from tqdm import tqdm
 
 
 def load_transforms(config):
@@ -39,7 +38,7 @@ def load_train_dataset(config):
     Load train dataset and apply transformations.
     """
 
-    dtrain = ChestXRDataset(config)
+    dtrain = ChestXRDataset(root=config.DATASET_ROOT, dset="train", valid_size=config.DVALID_SIZE)
 
     # load data loader
     dloadtrain = torch.utils.data.DataLoader(dtrain, batch_size=config.NBATCH,
@@ -54,7 +53,7 @@ def load_valid_dataset(config):
     Load validation dataset and apply transformations.
     """
 
-    dvalid = ChestXRDataset(config)
+    dvalid = ChestXRDataset(root=config.DATASET_ROOT, dset="valid", valid_size=config.DVALID_SIZE)
 
     # load data loaders
     dloadvalid = torch.utils.data.DataLoader(dvalid, batch_size=config.NBATCH,
@@ -69,7 +68,7 @@ def load_test_dataset(config):
     Load test dataset and apply transformations.
     """
 
-    dtest = ChestXRDataset(config)
+    dtest = ChestXRDataset(root=config.DATASET_ROOT, dset="test", valid_size=config.DVALID_SIZE)
 
     # load data loaders
     dloadtest = torch.utils.data.DataLoader(dtest, batch_size=1,

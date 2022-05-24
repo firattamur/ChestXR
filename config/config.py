@@ -6,10 +6,8 @@ Configuration hyperparameters for train.
 # Dataset
 # ----------------------------------------
 
-DATASET_ROOT       = "./dataset"
-DATASET_PATH_TEST  = "./dataset/images/train/images-test"
-DATASET_PATH_VALID = "./dataset/images/train/images-valid"
-DATASET_PATH_TRAIN = "./dataset/images/train/images-train"
+DATASET_ROOT = "./dataset"
+DVALID_SIZE  = 1000
 
 # ----------------------------------------
 # Model
