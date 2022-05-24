@@ -17,9 +17,6 @@ if __name__ == '__main__':
     logger = get_logger(config.MODEL)
 
     # load the dataloaders
-    dloadtest  = load_test_dataset(config)
-    logger.info(f"loading {len(dloadtest)}  samples test  dataset...")
-
     dloadvalid = load_valid_dataset(config)
     logger.info(f"loading {len(dloadvalid)} samples valid dataset...")
 
@@ -289,32 +286,3 @@ if __name__ == '__main__':
             )
 
             print("Best model exported as float32 format.\n")
-
-    else:
-
-        # ----------------------------------------
-        # Test
-        # ----------------------------------------
-
-        model.eval()
-        model.to(device)
-
-        accuracy_test = 0.0
-
-        with torch.no_grad():
-
-            for inputs, targets in tqdm(dloadtest):
-                # move tensors to device
-                inputs, targets = inputs.to(device, dtype=torch.float), targets.to(device)
-
-                # obtain the outputs from the model
-                outputs = model(inputs)
-
-                # obtain accuracy
-                acc = accuracy(outputs, targets)
-                accuracy_test += acc[0].item()
-
-        accuracy_test /= len(dloadtest)
-
-        print(f"Test Accuracy: {accuracy_test:.5f}")
-
