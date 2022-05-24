@@ -8,26 +8,26 @@ from torch.utils.data import Dataset
 
 class ChestXRDataset(Dataset):
 
-    def __init__(self, args):
+    def __init__(self, root: str, dset: str, valid_size: int):
         """
 
         Custom dataset for ChestXR-14 dataset.
 
-        :param args: input arguments parameters
+        :param config: input arguments parameters
 
         """
 
-        self.root      = args.root
-        self.is_train  = args.is_train
-        self.extension = args.extension
+        self.root = root
+        self.dset = dset
+        self.valid_size = valid_size
 
         self.path_images      = os.path.join(self.root, "images")
         self.path_labels_csv  = os.path.join(self.root, "csvs", "labels_encoded.csv")
         self.labels_encoded   = pd.read_csv(self.path_labels_csv)
 
-        if self.is_train:
+        if self.dset == "train" or self.dset == "valid":
 
-            self.path_txt = os.path.join(self.root, "txts", "train_val_list.txt")
+            self.path_txt   = os.path.join(self.root, "txts", "train_val_list.txt")
             self.transforms = transforms.Compose(
                 [
                     transforms.ToPILImage(),
@@ -49,11 +49,19 @@ class ChestXRDataset(Dataset):
 
         with open(self.path_txt, 'r') as file:
 
-            for name in file.readlines():
+            image_names = file.readlines()
+
+            for name in image_names:
                 path_image = os.path.join(self.path_images, name.strip())
 
                 if os.path.exists(path_image):
                     self.image_paths.append(path_image)
+
+        if self.dset == "train":
+            self.image_paths = self.image_paths[:-self.valid_size]
+
+        if self.dset == "valid":
+            self.image_paths = self.image_paths[-self.valid_size:]
 
     def __len__(self) -> int:
         """
