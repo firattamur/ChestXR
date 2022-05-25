@@ -18,10 +18,10 @@ if __name__ == '__main__':
 
     # load the dataloaders
     dloadvalid = load_valid_dataset(config)
-    logger.info(f"loading {len(dloadvalid)} samples valid dataset...")
+    logger.info(f"loading {len(dloadvalid) * config.NBATCH:04} samples valid dataset...")
 
     dloadtrain = load_train_dataset(config)
-    logger.info(f"loading {len(dloadtrain)} samples train dataset...")
+    logger.info(f"loading {len(dloadtrain) * config.NBATCH:04} samples train dataset...")
 
     logger.info("datasets.")
 
@@ -30,14 +30,18 @@ if __name__ == '__main__':
     logger.info(f"device: {device}.")
 
     # load model
-    model = timm.create_model(config.MODEL, pretrained=True, num_classes=config.NCLASSES)
+    model = timm.create_model(config.MODEL, pretrained=True, num_classes=config.NCLASSES, in_chans=1)
     logger.info("model.")
 
     # load model to device
     model.to(device)
 
+    # create sigmoid layer
+    sigmoid = nn.Sigmoid()
+    logger.info('sigmoid layer')
+
     # load loss
-    criterion = nn.CrossEntropyLoss(label_smoothing=config.LOSS_SMOOTH_FACTOR)
+    criterion = nn.BCELoss()
     logger.info("loss.")
 
     # load loss to device
@@ -77,7 +81,7 @@ if __name__ == '__main__':
 
         # load state dicts of models and optimizers
         optimizer.load_state_dict(checkpoint["optimizer"])
-        model.load_state_dict(checkpoint["efficientnet"])
+        model.load_state_dict(checkpoint["model"])
         scheduler.load_state_dict(checkpoint["scheduler"])
 
         epoch_start = checkpoint["epoch"]
@@ -120,16 +124,19 @@ if __name__ == '__main__':
         for inputs, targets in tqdm(dloadtrain):
 
             # tensors to device
-            inputs, targets = inputs.to(device, dtype=torch.float), targets.to(device)
-
+            inputs, targets = inputs.to(device, dtype=torch.float), targets.float().to(device)
+            
             # reset the gradients of all optimized variables
             optimizer.zero_grad()
 
             # forward pass
             outputs = model(inputs)
 
+            # scores to sigmoid outputs
+            outputs = sigmoid(outputs)
+
             # calculate the batch loss
-            loss = criterion(outputs, targets)
+            loss    = criterion(outputs, targets)
 
             # backward pass
             loss.backward()
@@ -141,28 +148,28 @@ if __name__ == '__main__':
             loss_train += loss.item()
 
             # update train accuracy
-            acc = accuracy(outputs, targets)
-            accuracy_train += acc[0].item()
+            acc = accuracy(outputs.detach().cpu().numpy(), targets.cpu().numpy())
+            accuracy_train += acc # acc[0].item()
 
-            if acc[0].item() > accuracy_batch_best:
-                accuracy_batch_best = acc[0].item()
+            if acc > accuracy_batch_best:
+                accuracy_batch_best = acc
 
             if idx % config.BATCH_LOG_INTERVAL == 0:
                 # log train and validation results
                 log = f"[{config.MODEL}] | [lr: {optimizer.param_groups[0]['lr']}] | Epoch[{epoch:03}/{config.NEPOCHS:03}]"
-                log += f"Batch[{idx:05}/{len(dloadtrain):05}]: "
+                log += f"Batch[{idx:03}/{len(dloadtrain):03}]: "
 
                 log += f"[Train]"
-                log += f"[loss: {loss.item():.5f} | "
-                log += f"accuracy : {acc[0].item():.5f}] | "
+                log += f"[loss: {loss.item():.3f} | "
+                log += f"accuracy : {acc:.3f}] | "
 
-                log += f"[best accuracy : {accuracy_batch_best:.5f}] | "
-                log += f"[best valid accuracy: {accuracy_valid_best:.5f}]"
+                log += f"[best accuracy : {accuracy_batch_best:.3f}] | "
+                log += f"[best valid accuracy: {accuracy_valid_best:.3f}]"
 
                 # display log
                 print(log)
 
-            if acc[0].item() > accuracy_batch_best:
+            if acc > accuracy_batch_best:
                 logger.info(log)
 
             idx += 1
@@ -184,20 +191,23 @@ if __name__ == '__main__':
 
                 for inputs, targets in tqdm(dloadvalid):
                     # move tensors to device
-                    inputs, targets = inputs.to(device, dtype=torch.float), targets.to(device)
+                    inputs, targets = inputs.to(device, dtype=torch.float), targets.float().to(device)
 
                     # forward pass
                     outputs = model(inputs)
 
+                    # sigmoid layer
+                    outputs = sigmoid(outputs)
+
                     # calculate the batch loss
-                    loss = criterion(outputs, targets)
+                    loss    = criterion(outputs, targets)
 
                     # update average validation loss
                     loss_valid += loss.item()
 
                     # update average validation accuracy
-                    acc = accuracy(outputs, targets)
-                    accuracy_valid += acc[0].item()
+                    acc = accuracy(outputs.detach().cpu().numpy(), targets.cpu().numpy())
+                    accuracy_valid += acc # acc[0].item()
 
             print("done.")
 
@@ -218,12 +228,12 @@ if __name__ == '__main__':
         log = f"\n[{config.MODEL}] | [lr: {optimizer.param_groups[0]['lr']}] | Epoch [{epoch:03}/{config.NEPOCHS:03}]: "
 
         log += "[Train]"
-        log += f"[loss: {loss_train:.5f} | "
-        log += f"accuracy : {accuracy_train:.5f}] - "
+        log += f"[loss: {loss_train:.3f} | "
+        log += f"accuracy : {accuracy_train:.3f}] - "
 
         log += "[Valid]"
-        log += f"[loss: {loss_valid:.5f} | "
-        log += f"accuracy : {accuracy_valid:.5f}]\n"
+        log += f"[loss: {loss_valid:.3f} | "
+        log += f"accuracy : {accuracy_valid:.3f}]\n"
 
         # display log
         print(log)
@@ -238,7 +248,8 @@ if __name__ == '__main__':
 
         # save a checkpoint
         if epoch % config.CHECKPOINT_SAVE_INTERVAL == 0:
-            model = {
+    
+            checkpoint = {
 
                 "epoch"             : epoch,
                 "optimizer"         : optimizer,
@@ -251,13 +262,13 @@ if __name__ == '__main__':
             name = f"checkpoint_{epoch + 1}.pth"
             save_to = os.path.join(model_checkpoints_path, name)
 
-            save_checkpoint(model=model, path=save_to)
+            save_checkpoint(checkpoint=checkpoint, path=save_to)
             print(f"Checkpoint {name} saved.")
 
         if accuracy_valid > accuracy_valid_best:
             accuracy_valid_best = accuracy_valid
 
-            model = {
+            checkpoint = {
 
                 "epoch"         : epoch,
                 "optimizer"     : optimizer,
@@ -270,14 +281,14 @@ if __name__ == '__main__':
             name = f"checkpoint_best.pth"
             save_to = os.path.join(model_checkpoints_path, name)
 
-            save_checkpoint(model=model, path=save_to)
+            save_checkpoint(checkpoint=checkpoint, path=save_to)
             print(f"Checkpoint {name} saved.\n")
 
             torch.onnx.export(
                 model,
-                torch.randn((1, 3, model.input_image_size, model.input_image_size), device=inputs.device,
-                            requires_grad=True),
-                f"./pretraineds/{config.MODEL}/LetsDrawOnnxFloat32.onnx",
+                torch.randn((1, 1, config.IMAGE_SIZE, config.IMAGE_SIZE),
+                             device=inputs.device, requires_grad=True),
+                f"./pretraineds/{config.MODEL}/OnnxFloat32.onnx",
                 export_params=True,
                 opset_version=9,  # the ONNX version to export the model to
                 do_constant_folding=True,

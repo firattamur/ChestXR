@@ -7,25 +7,26 @@ Configuration hyperparameters for train.
 # ----------------------------------------
 
 DATASET_ROOT = "./dataset"
-DVALID_SIZE  = 1000
+DVALID_SIZE  = 500
+IMAGE_SIZE   = 320
 
 # ----------------------------------------
 # Model
 # ----------------------------------------
 
-MODEL    = "mobilenetv3_large_100"
+MODEL    = "efficientnet_b3a"
 
-NBATCH   = 64
+NBATCH   = 32
 NWORKERS = 4
 BATCH_LOG_INTERVAL = 1000
 
 NEPOCHS  = 200
 
-NCLASSES            = 14
+NCLASSES            = 15
 LEARNING_RATE       = 0.001
 LOSS_SMOOTH_FACTOR  = 0.10
 
-CHECKPOINTS_PATH    = "./checkpoints"
+CHECKPOINTS_PATH    = "/Users/firattamur/Desktop/ChestXR/checkpoints"
 CHECKPOINT_SAVE_INTERVAL = 1
 
-PRETRAINEDS_PATH   = "./pretraineds"
+PRETRAINEDS_PATH   = "/Users/firattamur/Desktop/ChestXR/pretraineds"

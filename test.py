@@ -30,7 +30,7 @@ if __name__ == '__main__':
     checkpoint_path = best_or_last_checkpoint(path=model_checkpoints_path)
 
     checkpoint = load_checkpoint(path=checkpoint_path)
-    model.load_state_dict(checkpoint["efficientnet"])
+    model.load_state_dict(checkpoint["model"])
 
     # ----------------------------------------
     # Test

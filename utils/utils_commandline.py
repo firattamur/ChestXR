@@ -36,6 +36,6 @@ def get_logger(logger_name):
 
 
 def load_config():
-    config = SourceFileLoader('config', "./config/config.py").load_module()
+    config = SourceFileLoader('config', "/Users/firattamur/Desktop/ChestXR/config/config.py").load_module()
 
     return config

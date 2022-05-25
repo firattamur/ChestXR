@@ -1,14 +1,15 @@
 import os
 import torch
 import pandas as pd
-import imageio.v3 as iio
+
+from PIL import Image
 from torchvision import transforms
 from torch.utils.data import Dataset
 
 
 class ChestXRDataset(Dataset):
 
-    def __init__(self, root: str, dset: str, valid_size: int):
+    def __init__(self, root: str, dset: str, valid_size: int, img_size: int):
         """
 
         Custom dataset for ChestXR-14 dataset.
@@ -19,6 +20,7 @@ class ChestXRDataset(Dataset):
 
         self.root = root
         self.dset = dset
+        self.img_size   = img_size
         self.valid_size = valid_size
 
         self.path_images      = os.path.join(self.root, "images")
@@ -30,18 +32,28 @@ class ChestXRDataset(Dataset):
             self.path_txt   = os.path.join(self.root, "txts", "train_val_list.txt")
             self.transforms = transforms.Compose(
                 [
-                    transforms.ToPILImage(),
+                    
+                    # transforms.ToPILImage(),
                     transforms.ToTensor(),
+                    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+                    transforms.Resize((self.img_size, self.img_size)),
+                    transforms.Grayscale()               
+ 
                 ]
             )
 
         else:
 
-            self.path_txt = os.path.join(self.root, "txts", "test.txt")
+            self.path_txt   = os.path.join(self.root, "txts", "test.txt")
             self.transforms = transforms.Compose(
                 [
-                    transforms.ToPILImage(),
+                    
+                    # transforms.ToPILImage(),
                     transforms.ToTensor(),
+                    transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+                    transforms.Resize((self.img_size, self.img_size)), 
+                    transforms.Grayscale()             
+
                 ]
             )
 
@@ -87,8 +99,7 @@ class ChestXRDataset(Dataset):
 
         label = self.labels_encoded[self.labels_encoded["Image Index"] == image_name].drop(["Image Index"],
                                                                                            axis=1).values[0]
-        image = iio.imread(image_path)
-        image = torch.tensor(image).unsqueeze(0)
+        image = Image.open(image_path).convert('RGB')
 
         return self.transforms(image), torch.tensor(label)
 

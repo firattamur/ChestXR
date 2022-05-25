@@ -2,8 +2,11 @@ import os
 import glob
 import torch
 
+from sklearn.metrics import f1_score
+from sklearn.metrics import roc_auc_score
 
-def save_checkpoint(model: dict, path: str) -> None:
+
+def save_checkpoint(checkpoint: dict, path: str) -> None:
     """
     Save torch model state dict to specified path.
     :param model: input dict contains state dicts for models and optimizers
@@ -12,11 +15,11 @@ def save_checkpoint(model: dict, path: str) -> None:
 
     torch.save({
 
-        "epoch"         : model["epoch"],
-        "optimizer"     : model["optimizer"].state_dict(),
-        "params"        : model["params"].state_dict(),
-        "scheduler"     : model["scheduler"].state_dict(),
-        "best_accuracy" : model["best_accuracy"]
+        "epoch"         : checkpoint["epoch"],
+        "optimizer"     : checkpoint["optimizer"].state_dict(),
+        "model"         : checkpoint["model"].state_dict(),
+        "scheduler"     : checkpoint["scheduler"].state_dict(),
+        "best_accuracy" : checkpoint["best_accuracy"]
 
     }, path)
 
@@ -60,20 +63,26 @@ def accuracy(output, target, topk: tuple = (1,)) -> torch.Tensor:
 
     Compute the precision@k for the specified values of k.
 
-
     """
+       
+    output = (output > 0.5).astype(int)
+ 
+    return f1_score(target.astype(int), output, average='weighted', zero_division=1)
 
-    maxk = max(topk)
-    batch_size = target.size(0)
+    # maxk = max(topk)
+    # batch_size = target.size(0)
 
-    _, pred = output.topk(maxk, 1, True, True)
-    pred = pred.t()
-    correct = pred.eq(target.view(1, -1).expand_as(pred))
+    # _, pred = output.topk(maxk, 1, True, True)
+    # pred = pred.t()
+    # correct = pred.eq(target.view(1, -1).expand_as(pred))
 
-    res = []
+    # res = []
 
-    for k in topk:
-        correct_k = correct[:k].view(-1).float().sum(0)
-        res.append(correct_k.mul_(100.0 / batch_size))
+    # for k in topk:
+    #     correct_k = correct[:k].view(-1).float().sum(0)
+    #    res.append(correct_k.mul_(100.0 / batch_size))
 
-    return res
+    # return res
+
+
+
