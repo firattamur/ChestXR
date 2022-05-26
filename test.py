@@ -21,7 +21,7 @@ if __name__ == '__main__':
     logger.info(f"device: {device}.")
 
     # load model
-    model = timm.create_model(config.MODEL, pretrained=True, num_classes=config.NCLASSES)
+    model = timm.create_model(config.MODEL, pretrained=True, num_classes=config.NCLASSES, in_chans=1)
     logger.info("model.")
 
     model_checkpoints_path = os.path.join(config.CHECKPOINTS_PATH, config.MODEL)

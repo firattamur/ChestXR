@@ -14,6 +14,8 @@ config = load_config()
 @app.route("/", methods=["GET", "POST"])
 def home():
 
+    
+
     if request.method == "POST":
 
         if 'file' not in request.files:

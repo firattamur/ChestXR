@@ -207,3 +207,13 @@ fabric.properties
 
 # images
 dataset/images/*
+
+# checkpoints
+checkpoints/
+
+# pretraineds
+pretraineds/
+
+*.jpeg
+*.jpg
+*.png

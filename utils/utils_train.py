@@ -24,12 +24,12 @@ def save_checkpoint(checkpoint: dict, path: str) -> None:
     }, path)
 
 
-def load_checkpoint(path: str) -> dict:
+def load_checkpoint(path: str, map_location = None) -> dict:
     """
     Load torch model state dict from specified path.
     :param path : path to load state dict
     """
-    checkpoint = torch.load(path)
+    checkpoint = torch.load(path, map_location)
 
     return checkpoint
 
