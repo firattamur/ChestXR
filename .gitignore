@@ -214,6 +214,10 @@ checkpoints/
 # pretraineds
 pretraineds/
 
+run/
+
+*.log
+
 *.jpeg
 *.jpg
 *.png
