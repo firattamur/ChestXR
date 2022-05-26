@@ -4,22 +4,23 @@ const inputfile    = document.getElementById("inputfile");
 uploadButton.addEventListener('click', async _ => {
   try {
 
-    let file     = inputfile.files[0];
-    let formData = new FormData();
+    const file     = inputfile.files[0];
+    const formData = new FormData();
 
     formData.append("file", file);
 
-    const response = await fetch("http://127.0.0.1:5000", {
-      method: 'post',
+    uploadButton.disabled = true;
+    uploadButton.style.opacity = 0.5;
+
+    await fetch("http://127.0.0.1:5000", {
+      method: 'POST',
       body: formData,
     });
 
-    console.log('Completed!', response);
+    window.location.reload();
 
   } catch(err) {
-
     console.error(`Error: ${err}`);
-
   }
 
 });

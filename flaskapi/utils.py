@@ -34,7 +34,7 @@ def get_model(config):
     return model
 
 
-def process_image(config, image_bytes: bytes):
+def process_image(config, image):
 
     preprocess = transforms.Compose(
                                     [
@@ -45,8 +45,6 @@ def process_image(config, image_bytes: bytes):
                                         transforms.Grayscale(num_output_channels=1)
                                     ]
                                 )
-
-    image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
 
     return preprocess(image).unsqueeze(0)
 
@@ -68,6 +66,7 @@ def save_grad_cam(config, model, input_tensor: torch.Tensor, image: Image, targe
     cam = GradCAM(model=model, target_layers=target_layers, use_cuda=use_cuda)
 
     targets = [ClassifierOutputTarget(target)]
+
     # You can also pass aug_smooth=True and eigen_smooth=True, to apply smoothing.
     grayscale_cam = cam(input_tensor=input_tensor, targets=targets)
 
@@ -75,6 +74,9 @@ def save_grad_cam(config, model, input_tensor: torch.Tensor, image: Image, targe
     grayscale_cam = grayscale_cam[0, :]
     visualization = show_cam_on_image(image, grayscale_cam, use_rgb=True)
 
+    name = f"gradcam/{target}.jpeg"
     visualization = Image.fromarray(visualization)
-    visualization.save(f"gradcam/{target}.jpeg")
+    # visualization.save(name)
+
+    return visualization
 
