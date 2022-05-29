@@ -62,6 +62,7 @@ def home():
         top3_image_encoded = base64.b64encode(top3_data.getvalue())
 
         return render_template(
+
                         "index.html",
                         input_image=encoded_img_data.decode('utf-8'),
 
@@ -73,6 +74,7 @@ def home():
 
                         top3_image=top3_image_encoded.decode('utf-8'),
                         top3_category=response["top3_category"]
+
                         )
     else:
         return render_template("index.html",

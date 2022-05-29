@@ -4,13 +4,12 @@ import timm
 from PIL import Image
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 import torch
 import torchvision.transforms as transforms
 from utils.utils_train import best_or_last_checkpoint, load_checkpoint
 
-from pytorch_grad_cam import GradCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad
+from pytorch_grad_cam import GradCAM
 from pytorch_grad_cam.utils.model_targets import ClassifierOutputTarget
 from pytorch_grad_cam.utils.image import show_cam_on_image
 

@@ -51,8 +51,8 @@ if __name__ == '__main__':
             outputs = model(inputs)
 
             # obtain accuracy
-            acc = accuracy(outputs, targets)
-            accuracy_test += acc[0].item()
+            acc = accuracy(outputs.detach().cpu().numpy(), targets.cpu().numpy())
+            accuracy_test += acc
 
     accuracy_test /= len(dloadtest)
 

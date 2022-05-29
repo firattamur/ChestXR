@@ -32,8 +32,7 @@ class ChestXRDataset(Dataset):
             self.path_txt   = os.path.join(self.root, "txts", "train_val_list.txt")
             self.transforms = transforms.Compose(
                 [
-                    
-                    # transforms.ToPILImage(),
+
                     transforms.ToTensor(),
                     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
                     transforms.Resize((self.img_size, self.img_size)),
@@ -47,8 +46,7 @@ class ChestXRDataset(Dataset):
             self.path_txt   = os.path.join(self.root, "txts", "test.txt")
             self.transforms = transforms.Compose(
                 [
-                    
-                    # transforms.ToPILImage(),
+
                     transforms.ToTensor(),
                     transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
                     transforms.Resize((self.img_size, self.img_size)), 
