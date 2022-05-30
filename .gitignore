@@ -204,3 +204,20 @@ fabric.properties
 
 # idea folder 
 .idea
+
+# images
+dataset/images/*
+
+# checkpoints
+checkpoints/
+
+# pretraineds
+pretraineds/
+
+run/
+
+*.log
+
+*.jpeg
+*.jpg
+*.png
